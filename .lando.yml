@@ -4,6 +4,7 @@ proxy:
     - cms.decoupled.lndo.site
   nodejs:
     - decoupled.lndo.site
+
 services:
   cms:
     type: php:7.2
@@ -24,14 +25,14 @@ services:
     build:
       - "composer --ansi --working-dir=/app/backend install"
   mariadb:
-    type: mariadb:10.2
+    type: mariadb:10.3
     portforward: true
     creds:
       user: cms
       password: cms
       database: cms
   nodejs:
-    type: node:8
+    type: node:8.9
     ssl: true
     build:
       - "cd frontend && yarn install"
@@ -42,31 +43,24 @@ tooling:
   composer:
     service: cms
     cmd:
-      - "composer"
-      - "--ansi"
-      - "--working-dir=/app/backend"
+      - "composer --ansi --working-dir=/app/backend"
   drush:
     service: cms
     cmd:
-      - "/app/backend/vendor/drush/drush/drush"
-      - "--root=/app/backend/web"
-    needs:
-      - mariadb
-    options:
-      passthrough: true
+      - "/app/backend/vendor/drush/drush/drush --root=/app/backend/web"
   node:
     service: nodejs
   npm:
     service: nodejs
     cmd:
-      - "npm"
-      - "--cwd=/app/frontend"
+      - "npm --cwd=/app/frontend"
   yarn:
     service: nodejs
     cmd:
-      - "yarn"
-      - "--cwd=/app/frontend"
+      - "yarn --cwd=/app/frontend"
+
 events:
   post-start:
     - cms: "cp $LANDO_MOUNT/config/drupal/lando.settings.php $LANDO_MOUNT/backend/web/sites/default/settings.php"
     - cms: "cp $LANDO_MOUNT/backend/web/sites/example.settings.local.php $LANDO_MOUNT/backend/web/sites/default/settings.local.php"
+
